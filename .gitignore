@@ -160,5 +160,7 @@ cython_debug/
 #.idea/
 
 creds.txt
+data.json
 geckodriver.exe
 .zip
+.vscode/*

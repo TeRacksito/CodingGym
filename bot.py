@@ -37,7 +37,7 @@ async def main():
     ipc_client = ipc.Client(secret_key=CREDS[2])
 
     options = Options()
-    # options.add_argument('--headless')  # Ejecutar en modo headless
+    options.add_argument('--headless')
 
     platform_name = platform.system().lower()
     match platform_name:

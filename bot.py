@@ -42,7 +42,7 @@ async def main():
     platform_name = platform.system().lower()
     match platform_name:
         case "linux":
-            driver = webdriver.Firefox(options=options, executable_path=r'geckodriver')
+            driver = webdriver.Firefox(options=options, executable_path=r'./geckodriver')
         case "windows":
             print("Using Windows. This is not recommended.")
             driver = webdriver.Firefox(options=options, executable_path=r'geckodriver.exe')

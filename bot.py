@@ -512,7 +512,7 @@ def running_test(job: Job) -> int:
         raise NotImplementedError("Unsupported OS")
 
     if job.project_type == "Ant":
-        command.append("ant run")
+        command += ["ant run"]
     elif job.project_type == "Maven":
         main_file = glob.glob(os.path.join(job.path, "**/Main.java"), recursive=True)[0]
         if not main_file:
@@ -524,9 +524,9 @@ def running_test(job: Job) -> int:
             return 1
         main_file_split = main_file.split("\\" if platform.system() == "Windows" else "/")
         main_file = main_file_split[-2] + "." + main_file_split[-1].replace(".java", "")
-        command.append(f"mvn -q exec:java -Dexec.mainClass={main_file}")
+        command += [f"mvn -q exec:java -Dexec.mainClass={main_file}"]
     elif job.project_type == "Single file":
-        command.append(f"java {job.java_file[0]}")
+        command += [f"java {job.java_file[0]}"]
 
     for i, test_case in enumerate(test_cases):
         status, result = run_test_case(test_case, command, job)
@@ -614,7 +614,7 @@ def run_test_case(test_case: dict, command: list[str], job: Job) -> tuple[bool, 
     for input_data in test_case["inputs"]:
         input_data_bytes = bytes(str(input_data) + "\n", encoding="utf-8")
         process.stdin.write(input_data_bytes)
-    process.stdin.close()
+    # process.stdin.close()
 
     timeout = 10
 

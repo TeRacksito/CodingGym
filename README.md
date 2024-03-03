@@ -1,8 +1,8 @@
-# Campus Scrapper
+# CodingGy
 
-A **daemon Python service** that web scrapes a specific web page, uses IPC connection with a Nextcord Bot.
+A **daemon Python service** that processes Java programming exercise data to ensure compilation, execution, and testing.
 
-Configured to not work while IPC connection is unavailable.
+Requires DAW Bot to work properly.
 
 ## Table of Contents
 

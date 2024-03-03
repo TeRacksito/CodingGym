@@ -388,13 +388,19 @@ def compilation_test(job: Job):
         directory = os.path.dirname(file_path)
         project_type = "Ant"
     elif ismaven_project(path):
-        command += ["mvn", "verify"]
+        if platform.system() == "Windows":
+            command += ["mvn", "verify"]
+        else:
+            command += ["\"mvn verify\""]
         file_path = glob.glob(os.path.join(path, "**/pom.xml"), recursive=True)[0]
         directory = os.path.dirname(file_path)
         project_type = "Maven"
     elif len(java_files) == 1:
         build_path = os.path.join(path, "build")
-        command += ["javac", "-d", build_path] + java_files
+        if platform.system() == "Windows":
+            command += ["javac", "-d", build_path] + java_files
+        else:
+            command += [f"\"javac -d {build_path} {' '.join(java_files)}\""]
         project_type = "Single file"
         job.java_file = java_files
     else:
@@ -506,7 +512,10 @@ def running_test(job: Job) -> int:
         raise NotImplementedError("Unsupported OS")
 
     if job.project_type == "Ant":
-        command.append("ant run")
+        if platform.system() == "Windows":
+            command.append("ant run")
+        else:
+            command.append("\"ant run\"")
     elif job.project_type == "Maven":
         main_file = glob.glob(os.path.join(job.path, "**/Main.java"), recursive=True)[0]
         if not main_file:
@@ -518,9 +527,15 @@ def running_test(job: Job) -> int:
             return 1
         main_file_split = main_file.split("\\" if platform.system() == "Windows" else "/")
         main_file = main_file_split[-2] + "." + main_file_split[-1].replace(".java", "")
-        command.append(f"mvn -q exec:java -Dexec.mainClass={main_file}")
+        if platform.system() == "Windows":
+            command.append(f"mvn -q exec:java -Dexec.mainClass={main_file}")
+        else:
+            command.append(f"\"mvn -q exec:java -Dexec.mainClass={main_file}\"")
     elif job.project_type == "Single file":
-        command.append(f"java {job.java_file[0]}")
+        if platform.system() == "Windows":
+            command.append(f"java {job.java_file[0]}")
+        else:
+            command.append(f"\"java {job.java_file[0]}\"")
 
     for i, test_case in enumerate(test_cases):
         status, result = run_test_case(test_case, command, job)

@@ -160,7 +160,6 @@ cython_debug/
 #.idea/
 
 credentials.txt
-data.json
-geckodriver.exe
 .zip
 .vscode/*
+TOKEN.json

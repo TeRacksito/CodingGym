@@ -73,8 +73,6 @@ async def main():
 
         if data is None:
             continue
-        
-        print(f"Done Job Data: {data} - \n{sq}")
 
         step, job = data
         if job is None:
@@ -147,8 +145,6 @@ async def worker(sq: StepQueue):
     
         data = sq.get_next_job()
 
-        print(f"Job Data: {data} - \n{sq}")
-
         if data is not None:
             step, job = data
 
@@ -184,8 +180,6 @@ async def worker_done_job(sq: StepQueue):
             cooldown = 0
 
         data = sq.get_done_job(step=4)
-
-        print(f"Done Job Data: {data} - \n{sq}")
 
         if data is not None:
 

@@ -508,7 +508,7 @@ def running_test(job: Job) -> int:
     if job.project_type == "Ant":
         command += ["ant run"]
     elif job.project_type == "Maven":
-        main_file = glob.glob(os.path.join(job.path, "**/Main.java"), recursive=True)[0]
+        main_file = glob.glob(os.path.join(job.path, "**/Main.java"), recursive=True)
         if not main_file:
             job.broken = True
             job.text_content = (
@@ -516,6 +516,7 @@ def running_test(job: Job) -> int:
                 "Usando Maven, tu método main debe estar en la clase Main, en el archivo Main.java."
             )
             return 1
+        main_file = main_file[0]
         main_file_split = main_file.split("\\" if platform.system() == "Windows" else "/")
         main_file = main_file_split[-2] + "." + main_file_split[-1].replace(".java", "")
         command += [f"mvn -q exec:java -Dexec.mainClass={main_file}"]

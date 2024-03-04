@@ -611,7 +611,7 @@ def run_test_case(test_case: dict, command: list[str], job: Job) -> tuple[bool, 
         process.stdin.write(input_data_bytes)
     # process.stdin.close()
 
-    timeout = 10
+    timeout = 60 if job.project_type == "Maven" else 30
 
     # Read and print the output of the Ant project
     try:

@@ -4,6 +4,7 @@ Main bot file. This file contains the main bot loop and the main functions to pr
 import asyncio
 import glob
 import json
+import math
 import os
 import platform
 import re
@@ -610,7 +611,7 @@ def run_test_case(test_case: dict, command: list[str], job: Job) -> tuple[bool, 
     for input_data in test_case["inputs"]:
         input_data_bytes = bytes(str(input_data) + "\n", encoding="utf-8")
         process.stdin.write(input_data_bytes)
-    # process.stdin.close()
+    process.stdin.close()
 
     timeout = 60 if job.project_type == "Maven" else 30
 
@@ -632,10 +633,9 @@ def run_test_case(test_case: dict, command: list[str], job: Job) -> tuple[bool, 
         print(f"Process killed due to timeout. Timeout: {timeout} seconds.")
         return (False, "Timeout")
     
-    if exit_code != 0:
-        return (False, output_err)
-    else:
+    if exit_code == 0:
         return (True, output)
+    return (False, output if output_err is None else output_err)
 
 def compare_results(expected: list[str], obtained_lines: list[str]) -> bool:
     """
@@ -695,6 +695,8 @@ def abstraction_test(job: Job) -> tuple[float, list[str]]:
     """
     exercise_path = os.path.join(job.path, "job_data")
 
+    path = os.path.join(job.path, str(job.id_user))
+
     with open(os.path.join(exercise_path, "abstraction.json"), "r") as f:
         data: dict = json.load(f)
     
@@ -705,7 +707,7 @@ def abstraction_test(job: Job) -> tuple[float, list[str]]:
     banned_found: list[str] = []
 
     total_code = str()
-    java_files = glob.glob(os.path.join(job.path, "**/*.java"), recursive=True)
+    java_files = glob.glob(os.path.join(path, "**/*.java"), recursive=True)
     for file in java_files:
         with open(file, "r", encoding="utf-8") as f:
             total_code += f.read()
@@ -720,7 +722,7 @@ def abstraction_test(job: Job) -> tuple[float, list[str]]:
     required_total = sum(required.values())
     required_found_total = sum(required_found.values())
 
-    return (((required_found_total / required_total) * 100) - 100, banned_found)
+    return (round(((required_found_total / required_total) * 100) - 100, 2), banned_found)
 
 def chatgpt_consolidation(job: Job):
     """

@@ -43,6 +43,7 @@ async def main():
             
             CREDENTIALS = f.read().splitlines()
             os.environ["IPC_SECRET_KEY"] = CREDENTIALS[0]
+            os.environ["OPENAI_API_KEY"] = CREDENTIALS[1]
     except FileNotFoundError:
         print("It seems that you don't have the required files. Please, read README.md#installation.")
         sys.exit(1)
@@ -736,7 +737,7 @@ def chatgpt_consolidation(job: Job):
         The job to process.
     """
     try:
-        client = OpenAI(api_key= os.environ.get("OPENAI_API_KEY", "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"))
+        client = OpenAI(api_key= os.environ.get("OPENAI_API_KEY"))
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -752,6 +753,7 @@ def chatgpt_consolidation(job: Job):
             job.gpt_content = completion.choices[0].message.content
     
     except Exception as e:
+        print(e)
         job.gpt_content = "No se pudo obtener respuesta de ChatGPT"   
 
 async def updater(sq: StepQueue, key: str):

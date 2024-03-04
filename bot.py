@@ -779,10 +779,6 @@ async def updater(sq: StepQueue, key: str):
             while True:
                 print("Waiting for message...")
                 msg = conn.recv()
-
-                if msg == "status":
-                    conn.send("OK")
-                    continue
                 
                 job = Job(msg['id_exec'], msg["category"], msg['id_user'], msg['path'])
 

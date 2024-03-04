@@ -611,7 +611,7 @@ def run_test_case(test_case: dict, command: list[str], job: Job) -> tuple[bool, 
     for input_data in test_case["inputs"]:
         input_data_bytes = bytes(str(input_data) + "\n", encoding="utf-8")
         process.stdin.write(input_data_bytes)
-    process.stdin.close()
+    # process.stdin.close()
 
     timeout = 60 if job.project_type == "Maven" else 30
 

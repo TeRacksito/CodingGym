@@ -385,7 +385,7 @@ def compilation_test(job: Job):
         if platform.system() == "Windows":
             command += ["mvn", "verify"]
         else:
-            command += ["\"mvn verify\""]
+            command += ["mvn verify"]
         file_path = glob.glob(os.path.join(path, "**/pom.xml"), recursive=True)[0]
         directory = os.path.dirname(file_path)
         project_type = "Maven"

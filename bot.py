@@ -784,6 +784,17 @@ async def updater(sq: StepQueue, key: str):
             print("Connection reseted. Closing...")
             conn.close()
             listener.close()
+        
+        except EOFError:
+            print("EOFError. Closing...")
+            conn.close()
+            listener.close()
+        
+        except Exception as e:
+            print("Unexpected error. Closing...")
+            print(e)
+            conn.close()
+            listener.close()
 
 if __name__ == "__main__":
     terminal.initialize()

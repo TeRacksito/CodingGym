@@ -771,35 +771,43 @@ async def updater(sq: StepQueue, key: str):
     key : `str`
         The key to authenticate the connection.
     """
+    print("Starting updater...")
+    address = ('localhost', 6000)
+    listener = Listener(address, authkey=key.encode('utf-8'))
     while True:
-        print("Starting updater...")
-        address = ('localhost', 6000)
-        listener = Listener(address, authkey=key.encode('utf-8'))
-        conn = listener.accept()
-        print ('connection accepted from', listener.last_accepted)
         try:
-            while True:
-                print("Waiting for message...")
-                msg = conn.recv()
-                
-                job = Job(msg['id_exec'], msg["category"], msg['id_user'], msg['path'])
+            conn = listener.accept()
+            print ('connection accepted from', listener.last_accepted)
+            print("Waiting for message...")
+            msg = conn.recv()
+            
+            job = Job(msg['id_exec'], msg["category"], msg['id_user'], msg['path'])
 
-                sq.add_job(msg['step'], job, msg['priority'])
+            sq.add_job(msg['step'], job, msg['priority'])
+            conn.close()
         except ConnectionResetError:
             print("Connection reseted. Closing...")
-            conn.close()
-            listener.close()
+            if conn is not None:
+                conn.close()
+                del conn
+        
+        except ConnectionAbortedError:
+            print("Connection aborted. Closing...")
+            if conn is not None:
+                conn.close()
+                del conn
+
+        except ConnectionRefusedError:
+            print("Connection refused. Closing...")
+            if conn is not None:
+                conn.close()
+                del conn
         
         except EOFError:
             print("EOFError. Closing...")
-            conn.close()
-            listener.close()
-        
-        except Exception as e:
-            print("Unexpected error. Closing...")
-            print(e)
-            conn.close()
-            listener.close()
+            if conn is not None:
+                conn.close()
+                del conn
 
 if __name__ == "__main__":
     terminal.initialize()

@@ -23,6 +23,11 @@ class Database:
         If the file TOKEN.json does not exist or does not contain the database credentials.
     """
     def __init__(self) -> None:
+        self.mainDb = None
+        self.connect()
+        self.attempts = 0
+
+    def connect(self) -> None:
         try:
             with open("TOKEN.json", encoding="utf-8") as file:
                 data = json.load(file)
@@ -37,12 +42,14 @@ class Database:
                 password= password,
                 database= database
             )
+            
         except (KeyError, FileNotFoundError) as e:
             error(e, traceback.format_exc(), "Database credentials not found",
                   "Please make sure that the file TOKEN.json exists and contains the database credentials.", level="WARNING")
+            self.mainDb = None
             raise
 
-    def _check_table(self, table: str):
+    def _check_table(self, table: str, attempt: int = 0) -> bool:
         """
         Checks if a table exists in the database.
 
@@ -56,17 +63,26 @@ class Database:
         `bool`
             True or False depending on whether the table exists or not.
         """
-        cursor = self.mainDb.cursor()
+        try:
+            cursor = self.mainDb.cursor()
 
-        cursor.execute("SELECT table_name FROM information_schema.tables")
+            cursor.execute("SELECT table_name FROM information_schema.tables")
 
-        tabes = cursor.fetchall()
+            tabes = cursor.fetchall()
 
-        for table_name in tabes:
-            if table in table_name:
-                return True
+            for table_name in tabes:
+                if table in table_name:
+                    return True
 
-        return False
+            return False
+        except Exception as e:
+            if attempt < 3:
+                self.connect()
+                return self._check_table(table=table, attempt=attempt + 1)
+            else:
+                error(e, traceback.format_exc(), "Error checking table", level="ERROR")
+                return False
+
 
     def insert(self, table: str, names: list, values: list, retrieve_id: bool = False):
         """

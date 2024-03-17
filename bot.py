@@ -281,7 +281,7 @@ async def process_done_job(job: Job, step: int, sq: StepQueue):
     #         sq.addJob(step, job)
     #     sq.snapshot()
 
-def generate_project_files(job: Job):
+def generate_project_files(job: Job, attempt: int = 0):
     """
     Generate the project files for the user and the exercise.
 
@@ -296,6 +296,20 @@ def generate_project_files(job: Job):
         The job to process.
     """
 
+    if db is None:
+        job.broken = True
+        return False
+    
+    try:    
+        ex_data = db.select("EXERCISE", {"id": job.id_exec, "type": job.category})[0]
+    except IndexError:
+        if attempt < 3:
+            db.connect()
+            return generate_project_files(job, attempt + 1)
+        job.broken = True
+        job.text_content = "No se ha encontrado el ejercicio. Si el error persiste, contacta a un administrador."
+        return False
+
     path = job.path
 
     user_path = os.path.join(path, str(job.id_user))
@@ -306,12 +320,6 @@ def generate_project_files(job: Job):
     
     if not os.path.exists(exercise_path):
         os.makedirs(exercise_path)
-
-    if db is None:
-        job.broken = True
-        return False
-    
-    ex_data = db.select("EXERCISE", {"id": job.id_exec, "type": job.category})[0]
 
     ex_id: int =           ex_data[0] # type: ignore
     ex_type: str =         ex_data[1] # type: ignore
